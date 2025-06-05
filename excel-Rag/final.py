@@ -315,6 +315,7 @@ class ExcelRAGChatbot:
                     tokenizer_name=model_name,
                     device_map="auto",
                     tokenizer_kwargs={"trust_remote_code": True},
+                    streaming=True,
                     model_kwargs={
                         "torch_dtype": torch.float16,
                         "trust_remote_code": True
@@ -1137,28 +1138,7 @@ def create_chat_interface(chatbot, model_type):
         
         col1, col2 = st.columns(2)
         
-        with col1:
-            st.markdown("""
-        #     #### ✨ **Enhanced Features:**
-            
-        #     - **🎯 Improved Accuracy**: Enhanced system prompts and better retrieval
-        #     - **📊 Smart Data Analysis**: Automatic insights and patterns for any Excel data
-        #     - **🎨 Dynamic Visualizations**: Any chart type from natural language
-        #     - **🔍 Interactive Exploration**: Ask questions about your data in plain English
-        #     - **📈 Multiple Chart Types**: Histograms, pie charts, heatmaps, time series, and more
-        #     """)
-        
-        # with col2:
-        #     st.markdown("""
-        #     #### 📊 **Supported Data Types:**
-            
-        #     - **📋 Business Data**: Sales, finance, operations, inventory
-        #     - **👥 HR Data**: Employee records, performance, compensation
-        #     - **📞 Service Data**: Support tickets, customer service, ITSM
-        #     - **📈 Analytics Data**: Website metrics, marketing campaigns
-        #     - **🔬 Research Data**: Survey results, experimental data
-        #     - **📊 Any Excel/CSV**: General data analysis and visualization
-        #     """)
+    
 
 if __name__ == "__main__":
     create_streamlit_app()
