@@ -1,0 +1,28 @@
+
+
+# Core Dependencies
+streamlit
+pandas
+numpy
+plotly
+nest-asyncio
+
+# AI/ML Libraries
+sentence-transformers
+torch==2.5.1
+torchvision==0.20.1
+torchaudio==2.5.1
+transformers
+langchain
+langchain-ollama
+
+# LlamaIndex Core
+llama-index
+llama-index-core
+llama-index-embeddings-huggingface
+llama-index-llms-huggingface
+llama-index-llms-langchain
+llama-index-readers-docling>=0.1.0
+
+# Excel Support
+openpyxl>=3.1.0
