@@ -66,11 +66,11 @@ class ExcelAnalyzer:
         return summary
     
     def create_distribution_charts(self) -> List[Dict[str, Any]]:
-        """Create distribution charts for numeric and categorical data"""
+        """Create distribution charts - ONLY USEFUL ONES for ANY dataset"""
         charts = []
         
-        # Numeric distributions
-        for col in self.numeric_columns[:5]:  # Limit to first 5 for performance
+        # Numeric distributions (usually always useful)
+        for col in self.numeric_columns[:5]:
             fig = px.histogram(
                 self.df, 
                 x=col, 
@@ -86,8 +86,15 @@ class ExcelAnalyzer:
                 'description': f'Histogram and box plot showing distribution of {col}'
             })
         
-        # Categorical distributions (top 10 categories)
-        for col in self.categorical_columns[:3]:  # Limit to first 3
+        # SMART FILTER: Only useful categorical columns
+        useful_categorical_columns = []
+        
+        for col in self.categorical_columns:
+            if self._is_useful_for_visualization(col):
+                useful_categorical_columns.append(col)
+        
+        # Create pie charts only for useful columns
+        for col in useful_categorical_columns[:3]:
             value_counts = self.df[col].value_counts().head(10)
             if len(value_counts) > 1:
                 fig = px.pie(
@@ -230,6 +237,49 @@ class ExcelAnalyzer:
         charts.extend(self.create_time_series_charts())
         
         return charts
+    
+    def _is_useful_for_visualization(self, col: str) -> bool:
+        """Universal logic to determine if ANY column is worth visualizing"""
+        
+        # Rule 1: Skip if too many unique values (probably IDs/names)
+        unique_count = self.df[col].nunique()
+        total_rows = len(self.df)
+        
+        if unique_count > total_rows * 0.8:
+            return False
+        
+        if unique_count > 50:
+            return False
+        
+        # Rule 2: Skip single-value columns
+        if unique_count <= 1:
+            return False
+        
+        # Rule 3: Skip if values are too long
+        avg_length = self.df[col].astype(str).str.len().mean()
+        if avg_length > 30:
+            return False
+        
+        # Rule 4: Skip if looks like IDs
+        sample_values = self.df[col].dropna().head(20).astype(str)
+        
+        id_like_count = 0
+        for val in sample_values:
+            if (any(char.isdigit() for char in val) and len(val) > 6) or \
+            (val.replace('-', '').replace('_', '').isalnum() and len(val) > 8):
+                id_like_count += 1
+        
+        if len(sample_values) > 0 and id_like_count > len(sample_values) * 0.7:
+            return False
+        
+        # Rule 5: KEEP if reasonable number of categories
+        if 2 <= unique_count <= 20:
+            return True
+        
+        if 20 < unique_count <= 50 and unique_count < total_rows * 0.5:
+            return True
+        
+        return False
 
 class ExcelRAGChatbot:
     """Enhanced Excel RAG Chatbot for general Excel data analysis"""
@@ -315,7 +365,7 @@ class ExcelRAGChatbot:
                     tokenizer_name=model_name,
                     device_map="auto",
                     tokenizer_kwargs={"trust_remote_code": True},
-                    streaming=True,
+                    
                     model_kwargs={
                         "torch_dtype": torch.float16,
                         "trust_remote_code": True
@@ -388,28 +438,33 @@ class ExcelRAGChatbot:
         
         enhanced_prompt = f"""You are an expert data analyst with deep expertise in Excel data analysis.
 
-{columns_info}
+        IMPORTANT: For visualization requests (charts, plots, graphs, dashboard), give ONLY a brief response like "Creating charts from your data" - do NOT provide coding examples or explanations.
 
-CORE INSTRUCTIONS:
-1. **Be Precise**: Base ALL answers on the actual data provided in context
-2. **Be Specific**: Use exact numbers, percentages, and column names from the data
-3. **Be Analytical**: Provide insights relevant to data analysis and decision-making
-4. **Be Accurate**: If you don't see specific data in context, say "I don't see that information in the provided data"
-5. **Be Comprehensive**: When analyzing, look for patterns, trends, outliers, and correlations
 
-RESPONSE FORMAT:
-- Start with direct answer to the question
-- Support with specific data points and numbers
-- End with analytical insights or observations
-- Use clear, professional language
+        {columns_info}
 
-ACCURACY REQUIREMENTS:
-- Never make up numbers or statistics not in the provided context
-- Always cite specific data when making claims
-- Distinguish between what you observe vs. what you infer
-- Acknowledge limitations when data is insufficient
+        CORE INSTRUCTIONS:
+        1. **For visualization requests**: Respond briefly, let the chart system handle it
+        2. **For analysis requests**: Provide detailed insights from the actual data
+        3. **Be Precise**: Base ALL answers on the actual data provided in context
+        4. **Be Specific**: Use exact numbers, percentages, and column names from the data
+        5. **Be Analytical**: Provide insights relevant to data analysis and decision-making
+        6. **Be Accurate**: If you don't see specific data in context, say "I don't see that information in the provided data"
+        7. **Be Comprehensive**: When analyzing, look for patterns, trends, outliers, and correlations
 
-Remember: Your credibility depends on accuracy. Be precise and evidence-based."""
+        RESPONSE FORMAT:
+        - Start with direct answer to the question
+        - Support with specific data points and numbers
+        - End with analytical insights or observations
+        - Use clear, professional language
+
+        ACCURACY REQUIREMENTS:
+        - Never make up numbers or statistics not in the provided context
+        - Always cite specific data when making claims
+        - Distinguish between what you observe vs. what you infer
+        - Acknowledge limitations when data is insufficient
+
+        Remember: Your credibility depends on accuracy. Be precise and evidence-based."""
 
         return enhanced_prompt
     
@@ -557,6 +612,10 @@ Remember: Your credibility depends on accuracy. Be precise and evidence-based.""
     
     def chat(self, question: str) -> str:
         """Enhanced chat with response validation"""
+        question_lower = question.lower()
+        if any(word in question_lower for word in ['chart', 'plot', 'graph', 'visualization', 'dashboard']):
+            return ""
+        
         if self.chat_engine:
             try:
                 with st.spinner(f"🔍 Analyzing data with enhanced accuracy using {self.model_type.title()}..."):
@@ -691,17 +750,19 @@ Remember: Your credibility depends on accuracy. Be precise and evidence-based.""
         
         question_lower = question.lower()
         
-        # Parse chart type from question
+        # ADD THIS DASHBOARD DETECTION:
+        if any(word in question_lower for word in ['dashboard', 'multiple visualizations', 'visualizations', 'charts']):
+            # Return the smart dashboard directly
+            return self.analyzer.create_smart_dashboard()
+        
+        # Parse chart type from question (existing code)
         chart_type = self._detect_chart_type(question_lower)
         if not chart_type:
-            return []  # No chart requested
+            return []
         
-        # Parse what data columns they want
+        # Rest of your existing code...
         target_columns = self._detect_target_columns(question_lower)
-        
-        # Create the requested chart with actual data
         chart = self._create_dynamic_chart(chart_type, target_columns, question_lower)
-        
         return [chart] if chart else []
 
     def _detect_chart_type(self, question_lower: str) -> str:
@@ -718,10 +779,56 @@ Remember: Your credibility depends on accuracy. Be precise and evidence-based.""
         }
         
         for chart_type, keywords in chart_keywords.items():
+
             if any(keyword in question_lower for keyword in keywords):
                 return chart_type
         
         return None
+    
+    def _is_useful_for_visualization(self, col: str) -> bool:
+        """Universal logic to determine if ANY column is worth visualizing"""
+        
+        # Rule 1: Skip if too many unique values (probably IDs/names)
+        unique_count = self.df[col].nunique()
+        total_rows = len(self.df)
+        
+        if unique_count > total_rows * 0.8:
+            return False
+        
+        if unique_count > 50:
+            return False
+        
+        # Rule 2: Skip single-value columns
+        if unique_count <= 1:
+            return False
+        
+        # Rule 3: Skip if values are too long
+        avg_length = self.df[col].astype(str).str.len().mean()
+        if avg_length > 30:
+            return False
+        
+        # Rule 4: Skip if looks like IDs
+        sample_values = self.df[col].dropna().head(20).astype(str)
+        
+        id_like_count = 0
+        for val in sample_values:
+            if (any(char.isdigit() for char in val) and len(val) > 6) or \
+            (val.replace('-', '').replace('_', '').isalnum() and len(val) > 8):
+                id_like_count += 1
+        
+        if len(sample_values) > 0 and id_like_count > len(sample_values) * 0.7:
+            return False
+        
+        # Rule 5: KEEP if reasonable number of categories
+        if 2 <= unique_count <= 20:
+            return True
+        
+        if 20 < unique_count <= 50 and unique_count < total_rows * 0.5:
+            return True
+        
+        return False
+    
+    
 
     def _detect_target_columns(self, question_lower: str) -> Dict[str, List[str]]:
         """Detect which columns user wants to visualize"""
@@ -1097,9 +1204,9 @@ def create_chat_interface(chatbot, model_type):
             if st.button("🔍 Find patterns", key=f"{model_type}_patterns"):
                 st.session_state[f"{model_type}_sample_question"] = "What patterns and trends do you see in the data?"
         
-        with col4:
-            if st.button("📊 Distribution charts", key=f"{model_type}_distribution"):
-                st.session_state[f"{model_type}_sample_question"] = "Show me distribution charts for my data"
+        # with col4:
+        #     if st.button("📊 Distribution charts", key=f"{model_type}_distribution"):
+        #         st.session_state[f"{model_type}_sample_question"] = "Show me distribution charts for my data"
         
         # Chat input
         question = st.text_input(
@@ -1119,7 +1226,7 @@ def create_chat_interface(chatbot, model_type):
             st.markdown(f"#### 🤖 AI Response ({model_type.title()})")
             st.markdown(response)
             
-            # Generate visualizations
+            # ADD THIS MISSING CODE:
             charts = chatbot.create_visualizations(question)
             if charts:
                 st.markdown("#### 📊 Data Visualizations")
@@ -1129,7 +1236,7 @@ def create_chat_interface(chatbot, model_type):
                         st.plotly_chart(chart['figure'], use_container_width=True, key=f"{model_type}_chart_{i}")
                         st.caption(f"📈 {chart['description']}")
                         
-                        if i > 0 and i % 2 == 1:  # Add some spacing every 2 charts
+                        if i > 0 and i % 2 == 1:  # Add spacing every 2 charts
                             st.markdown("---")
     
     else:
