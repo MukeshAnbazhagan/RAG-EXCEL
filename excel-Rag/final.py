@@ -865,7 +865,7 @@ def create_streamlit_app():
     """Create optimized Streamlit interface with ChatGPT-like chat history"""
     st.set_page_config(
         page_title="Incident Triage using GenAI",
-        page_icon="🚀", 
+        page_icon="🧠", 
         layout="wide",
         initial_sidebar_state="expanded"
     )
