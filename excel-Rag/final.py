@@ -1264,33 +1264,6 @@ def create_streamlit_app():
         st.markdown('''
         <div class="getting-started">
             <h3>👈 Upload your data files in the sidebar to begin analysis!</h3>
-            <br>
-            <div style="text-align: left; max-width: 600px; margin: 0 auto;">
-                <h4>📋 Expected Data Structure:</h4>
-                <ul style="color: #a0aec0; line-height: 1.8;">
-                    <li><strong>Number</strong> - Unique identifiers</li>
-                    <li><strong>Task type</strong> - Issue categories</li>
-                    <li><strong>Assignment group</strong> - Team assignments</li>
-                    <li><strong>Assigned to</strong> - Individual assignments</li>
-                    <li><strong>State</strong> - Current status</li>
-                    <li><strong>Short description</strong> - Issue summaries</li>
-                    <li><strong>Priority</strong> - Urgency levels</li>
-                    <li><strong>Created</strong> - Timestamps</li>
-                    <li><strong>Resolve notes</strong> - Resolution details</li>
-                </ul>
-                
-                <h4>📁 Supported Formats:</h4>
-                <p style="color: #a0aec0;">Excel (.xlsx, .xls) and CSV files</p>
-                
-                <h4>🎯 Features Available:</h4>
-                <ul style="color: #a0aec0; line-height: 1.8;">
-                    <li>📊 Interactive data visualization</li>
-                    <li>🤖 AI-powered insights and analysis</li>
-                    <li>📈 Smart dashboards and charts</li>
-                    <li>💬 Chat-based data exploration</li>
-                    <li>📅 Time-based trend analysis</li>
-                </ul>
-            </div>
         </div>
         ''', unsafe_allow_html=True)
 
