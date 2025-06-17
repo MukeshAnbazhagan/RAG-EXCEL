@@ -565,7 +565,7 @@ class OptimizedRAGChatbot:
             Settings.chunk_size = 256
             Settings.chunk_overlap = 100
             
-            st.success(f"✅ {self.model_type.title()} models optimized for your data structure!")
+            # st.success(f"✅ {self.model_type.title()} models optimized for your data structure!")
             
         except Exception as e:
             st.error(f"❌ Error setting up {self.model_type} models: {e}")
@@ -612,7 +612,7 @@ class OptimizedRAGChatbot:
             try:
                 self.docling_reader = DoclingReader()
                 self.node_parser = SentenceSplitter(chunk_size=256, chunk_overlap=100, separator=" ")
-                st.success("✅ Document reader optimized for your data!")
+                # st.success("✅ Document reader optimized for your data!")
             except Exception as e:
                 st.error(f"❌ Error setting up document reader: {e}")
                 self.docling_reader = None
