@@ -1158,11 +1158,11 @@ def create_streamlit_app():
                         st.metric("🧩 Chunks", "0")
                 
                 # Status indicators with better styling
-                st.markdown("---")
-                if file_info.get('has_rag'):
-                    st.markdown("✅ **Advanced Analysis Ready**")
-                if file_info.get('has_analyzer'):
-                    st.markdown("✅ **Visualizations Ready**")
+                # st.markdown("---")
+                # if file_info.get('has_rag'):
+                #     st.markdown("✅ **Advanced Analysis Ready**")
+                # if file_info.get('has_analyzer'):
+                #     st.markdown("✅ **Visualizations Ready**")
         
         # Clear chat history button with better styling
         st.markdown("---")
