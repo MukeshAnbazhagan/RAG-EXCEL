@@ -1133,11 +1133,11 @@ def create_streamlit_app():
         )
         
         if uploaded_files and st.session_state.hf_chatbot:
-            if st.button("🚀 Process Files", type="primary", key="hf_process"):
+            if st.button(" Process Files", type="primary", key="hf_process"):
                 success = st.session_state.hf_chatbot.process_files(uploaded_files)
                 if success:
                     st.balloons()
-                    st.success("🎉 Ready for analysis!")
+                    st.success("Ready for analysis!")
                     st.rerun()
         
         # File info with better styling
