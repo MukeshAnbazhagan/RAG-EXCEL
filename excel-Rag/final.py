@@ -864,7 +864,7 @@ Ask about specific columns like Task type, Assignment group, Priority, time tren
 def create_streamlit_app():
     """Create optimized Streamlit interface with ChatGPT-like chat history"""
     st.set_page_config(
-        page_title="🚀 Incident Analysis Chatbot",
+        page_title="Incident Triage using GenAI",
         page_icon="🚀", 
         layout="wide",
         initial_sidebar_state="expanded"
@@ -1117,7 +1117,7 @@ def create_streamlit_app():
             st.error("❌ Hugging Face dependencies not available")
             st.session_state.hf_chatbot = None
     
-    st.markdown('<h1 class="main-title">🚀 Incident Analysis Chatbot</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="main-title"> Incident Triage using GenAI </h1>', unsafe_allow_html=True)
     # st.markdown('<p class="subtitle">AI-powered analysis optimized for your 9-column data structure</p>', unsafe_allow_html=True)
     
     # Main layout with sidebar for file upload and main area for chat
@@ -1210,7 +1210,7 @@ def create_streamlit_app():
         else:
             st.markdown('''
             <div style="text-align: center; padding: 40px; color: #a0aec0;">
-                <h3>👋 Welcome to your AI Data Analyst!</h3>
+                <h3> Welcome to your AI Data Analyst!</h3>
                 <p>Start a conversation by asking about your data or use the quick actions below.</p>
             </div>
             ''', unsafe_allow_html=True)
@@ -1218,7 +1218,7 @@ def create_streamlit_app():
         st.markdown('</div>', unsafe_allow_html=True)
         
         # Quick action buttons with better styling
-        st.markdown('<h3 class="section-header">🎯 Quick Actions</h3>', unsafe_allow_html=True)
+        st.markdown('<h3 class="section-header"> Quick Actions</h3>', unsafe_allow_html=True)
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
@@ -1242,7 +1242,7 @@ def create_streamlit_app():
                 process_question(question, st.session_state.hf_chatbot)
         
         # Chat input at the bottom with better styling
-        st.markdown('<h3 class="section-header">💭 Ask a Question</h3>', unsafe_allow_html=True)
+        # st.markdown('<h3 class="section-header">💭 Ask a Question</h3>', unsafe_allow_html=True)
         
         # Use a form to handle the input and submission
         with st.form("chat_form", clear_on_submit=True):
@@ -1259,7 +1259,7 @@ def create_streamlit_app():
     
     else:
         # Getting started interface with better styling
-        st.markdown('<h2 class="section-header">🚀 Get Started</h2>', unsafe_allow_html=True)
+        # st.markdown('<h2 class="section-header">🚀 Get Started</h2>', unsafe_allow_html=True)
         
         st.markdown('''
         <div class="getting-started">
